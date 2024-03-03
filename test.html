@@ -11,7 +11,6 @@
         grid-template-rows: repeat(8, 50px);
         gap: 1px;
       }
-
       .cell {
         width: 50px;
         height: 50px;
@@ -20,21 +19,17 @@
         justify-content: center;
         align-items: center;
       }
-
       .cell .disc {
         width: 40px;
         height: 40px;
         border-radius: 50%;
       }
-
       .black {
         background-color: black;
       }
-
       .white {
         background-color: white;
       }
-
       #info {
         margin-top: 20px;
       }
@@ -47,7 +42,6 @@
         <p id="currentTurn">ターン: 黒</p>
         <p id="blackCount">黒: 2</p>
         <p id="whiteCount">白: 2</p>
-        <!-- パスボタンの追加 -->
         <button id="passButton">パス</button>
       </div>
     </div>
@@ -61,35 +55,27 @@
       let currentTurn = "black";
       let blackCount = 2;
       let whiteCount = 2;
-      let passCount = 0; // パスが連続で押された回数を追跡
+      let passCount = 0;
 
       function createBoard() {
         for (let i = 0; i < 64; i++) {
           const cell = document.createElement("div");
           cell.classList.add("cell");
           cell.addEventListener("click", () => placeDisc(i));
-
-          // 初期配置に従ってディスクを配置
-          if (
-            i === 27 ||
-            i === 36 || // 白の初期配置
-            i === 28 ||
-            i === 35 // 黒の初期配置
-          ) {
-            const disc = document.createElement("div");
-            disc.classList.add("disc");
-            if (i === 27 || i === 36) {
-              disc.classList.add("white");
-            } else {
-              disc.classList.add("black");
-            }
-            cell.appendChild(disc);
-          }
-
           boardElement.appendChild(cell);
         }
+        // 初期配置
+        placeInitialDiscs();
+        updateCounts();
       }
-      <!-- コマ数の個数をアップデートする処理の関数 -->
+
+      function placeInitialDiscs() {
+        placeDisc(27, true); // 白
+        placeDisc(28, true); // 黒
+        placeDisc(35, true); // 黒
+        placeDisc(36, true); // 白
+      }
+
       function updateCounts() {
         let black = 0;
         let white = 0;
@@ -110,16 +96,27 @@
         whiteCountElement.textContent = `白: ${whiteCount}`;
       }
 
-      function placeDisc(index) {
-        const cell = boardElement.children[index];
-        if (cell.children.length === 0) {
+      function placeDisc(index, isInitialSetup = false) {
+        if (
+          isInitialSetup ||
+          boardElement.children[index].children.length === 0
+        ) {
           const disc = document.createElement("div");
-          disc.classList.add("disc", currentTurn);
-          cell.appendChild(disc);
-          updateCounts();
-          passCount = 0; // 駒を置くたびにパスカウントをリセット
-          checkForEndGame(); // 勝敗判定
-          switchTurn();
+          disc.classList.add(
+            "disc",
+            isInitialSetup
+              ? index === 27 || index === 36
+                ? "white"
+                : "black"
+              : currentTurn
+          );
+          boardElement.children[index].appendChild(disc);
+          if (!isInitialSetup) {
+            updateCounts();
+            passCount = 0;
+            checkForEndGame();
+            switchTurn();
+          }
         }
       }
 
@@ -139,46 +136,35 @@
       }
 
       function checkForEndGame() {
-        let endGameMessage = ""; // ゲーム終了時のメッセージを格納する変数
-        // 駒の数が0になるか、全てのマスが埋まったかをチェック
+        let endGameMessage = "";
         if (
           blackCount === 0 ||
           whiteCount === 0 ||
           blackCount + whiteCount === 64
         ) {
-          if (blackCount === whiteCount) {
-            // 引き分けの条件
-            endGameMessage = "ゲーム終了! 引き分けです。";
-          } else {
-            endGameMessage = `ゲーム終了! 勝者: ${
-              blackCount > whiteCount ? "黒" : "白"
-            }`;
-          }
+          endGameMessage =
+            blackCount === whiteCount
+              ? "ゲーム終了! 引き分けです。"
+              : `ゲーム終了! 勝者: ${blackCount > whiteCount ? "黒" : "白"}`;
         } else if (passCount >= 2) {
-          // 両方が駒を置けなくなる（パスが2回押される）
-          if (blackCount === whiteCount) {
-            endGameMessage = "ゲーム終了! 引き分けです。";
-          } else {
-            endGameMessage = `ゲーム終了! 勝者: ${
-              blackCount > whiteCount ? "黒" : "白"
-            }`;
-          }
+          endGameMessage =
+            blackCount === whiteCount
+              ? "ゲーム終了! 引き分けです。"
+              : `ゲーム終了! 勝者: ${blackCount > whiteCount ? "黒" : "白"}`;
         }
-        // 遅延処理をここで実装することでレンダリングがされる→前回alertの前にresetBoard()を呼び出していたため、初期化レンダリングが先にされてしまったりしていた。必要なら待機処理を適切に組むが今回はシンプルなのでこれで十分耐用可。
+
         if (endGameMessage !== "") {
           setTimeout(() => {
             alert(endGameMessage);
             resetBoard();
-          }, 100); // 少し遅延を設ける→アラートのレンダリング中止前にレンダリング処理を完了するため
+          }, 100); // 少し遅延を設ける
         }
       }
 
       function resetBoard() {
-        // 各セルの内部的なリスナーを削除
         while (boardElement.firstChild) {
           boardElement.removeChild(boardElement.firstChild);
         }
-        // 初期化処理
         blackCount = 2;
         whiteCount = 2;
         passCount = 0;
