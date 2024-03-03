@@ -67,17 +67,31 @@
           const cell = document.createElement("div");
           cell.classList.add("cell");
           cell.addEventListener("click", () => placeDisc(i));
+
+          // 初期配置に従ってディスクを配置
+          if (
+            i === 27 ||
+            i === 36 || // 白の初期配置
+            i === 28 ||
+            i === 35 // 黒の初期配置
+          ) {
+            const disc = document.createElement("div");
+            disc.classList.add("disc");
+            if (i === 27 || i === 36) {
+              disc.classList.add("white");
+            } else {
+              disc.classList.add("black");
+            }
+            cell.appendChild(disc);
+          }
+
           boardElement.appendChild(cell);
         }
       }
-
       <!-- コマ数の個数をアップデートする処理の関数 -->
       function updateCounts() {
-        // 駒のカウントをリセット
         let black = 0;
         let white = 0;
-
-        // 盤上の全セルをスキャンして駒の数をカウント
         for (let i = 0; i < boardElement.children.length; i++) {
           const cell = boardElement.children[i];
           if (cell.children.length > 0) {
@@ -89,12 +103,8 @@
             }
           }
         }
-
-        // カウントした結果をグローバル変数に設定
         blackCount = black;
         whiteCount = white;
-
-        // 画面の表示を更新
         blackCountElement.textContent = `黒: ${blackCount}`;
         whiteCountElement.textContent = `白: ${whiteCount}`;
       }
@@ -105,7 +115,7 @@
           const disc = document.createElement("div");
           disc.classList.add("disc", currentTurn);
           cell.appendChild(disc);
-          updateGameStatus();
+          updateCounts(); // ここの関数呼び出しシンボルが間違ってた
           switchTurn();
         }
       }
@@ -121,13 +131,6 @@
         currentTurnElement.textContent = `ターン: ${
           currentTurn === "black" ? "黒" : "白"
         }`;
-      }
-
-      function updateGameStatus() {
-        // 石の数を更新するロジックをここに実装
-        // この例では具体的なゲームロジックは省略しています
-        blackCountElement.textContent = `黒: ${blackCount}`;
-        whiteCountElement.textContent = `白: ${whiteCount}`;
       }
 
       createBoard();
