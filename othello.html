@@ -37,18 +37,113 @@
 
       #info {
         margin-top: 20px;
+        display: flex;
+        align-items: center;
+        margin-left: 20px;
+      }
+
+      .game-title {
+        font-size: 24px;
+        text-align: center;
+        margin: 20px 0;
+        font-weight: bold;
+        color: #ffd700; /* 明るいオレンジ色 */
+        text-shadow: 2px 2px 4px #000; /* 影をより鮮明に */
+      }
+
+      /* ゲーム全体を中央に配置 */
+      #game {
+        max-width: 420px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f0f0f0; /* 背景色を保持 */
+      }
+
+      /* レスポンシブ対応 */
+      @media (max-width: 480px) {
+        #board {
+          grid-template-columns: repeat(8, 40px);
+          grid-template-rows: repeat(8, 40px);
+        }
+        .cell,
+        .cell .disc {
+          width: 40px;
+          height: 40px;
+        }
+        .cell .disc {
+          width: 35px;
+          height: 35px;
+        }
+      }
+
+      /* ターン表示の横に配置するアニメーションボックス */
+      .box {
+        width: 20px;
+        height: 20px;
+        margin-left: 20px; /* 文字同士の間隔をより広げる */
+        background-color: black; /* 初期色を設定 */
+        animation: rotate-scale infinite 4s linear;
+        transform-origin: center;
+        border-radius: 2px; /* 角を丸く */
+        box-shadow: 0 0 2px #000; /* 軽い影を追加 */
+      }
+
+      .box.black {
+        background-color: black; /* 黒い四角 */
+        box-shadow: 0 0 5px #add8e6; /* 水色っぽい影 */
+      }
+
+      .box.white {
+        background-color: white; /* 白い四角 */
+        box-shadow: 0 0 5px #ffd700; /* 薄いオレンジ色の影 */
+      }
+
+      @keyframes rotate-scale {
+        0% {
+          transform: rotate(0deg) scale(1.1);
+        }
+        50% {
+          transform: rotate(180deg) scale(1.2);
+        }
+        100% {
+          transform: rotate(360deg) scale(1.1);
+        }
+      }
+
+      #info > *:not(:last-child) {
+        margin-right: 20px; /* 各要素間の右マージンを広げる */
+      }
+
+      #passButton {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 20px;
+        background-color: #007bff; /* オーシャンブルーに変更 */
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s, box-shadow 0.3s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* より立体感を出すための影を追加 */
+        margin-left: 48px; /* ボタンの位置を左にずらす */
+        margin-bottom: 8px;
+      }
+
+      #passButton:hover {
+        background-color: #0056b3; /* マウスオーバー時に少し濃いオーシャンブルーに変更 */
+        box-shadow: 0 0 8px #29b6f6; /* マウスオーバー時に光るエフェクトを追加 */
       }
     </style>
   </head>
   <body>
     <div id="game">
+      <div class="game-title">OTHELLO GAME</div>
       <div id="board"></div>
       <div id="info">
+        <div class="box"></div>
         <p id="currentTurn">ターン: 黒</p>
         <p id="blackCount">黒: 2</p>
         <p id="whiteCount">白: 2</p>
-        <!-- パスボタンの追加 -->
-        <button id="passButton">パス</button>
+        <button id="passButton">pass</button>
       </div>
     </div>
 
@@ -107,6 +202,7 @@
         whiteCountElement.textContent = `白: ${whiteCount}`;
       }
 
+      // オセロをひっくり返す処理の関数
       function flipDiscs(x, y, color) {
         let flippedAny = false;
         const directions = [
@@ -185,6 +281,12 @@
         currentTurnElement.textContent = `ターン: ${
           currentTurn === "black" ? "黒" : "白"
         }`;
+
+        // ターンに応じて.boxのクラスを更新
+        const box = document.querySelector(".box");
+        if (box) {
+          box.className = "box " + currentTurn; // 'box black' または 'box white' クラスを追加
+        }
       }
 
       function checkForEndGame() {
