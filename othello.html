@@ -93,15 +93,12 @@
       function updateCounts() {
         let black = 0;
         let white = 0;
-        for (let i = 0; i < boardElement.children.length; i++) {
+        for (let i = 0; i < 64; i++) {
           const cell = boardElement.children[i];
           if (cell.children.length > 0) {
-            const disc = cell.firstChild;
-            if (disc.classList.contains("black")) {
-              black++;
-            } else if (disc.classList.contains("white")) {
-              white++;
-            }
+            const disc = cell.children[0];
+            if (disc.classList.contains("black")) black++;
+            else if (disc.classList.contains("white")) white++;
           }
         }
         blackCount = black;
@@ -110,16 +107,68 @@
         whiteCountElement.textContent = `白: ${whiteCount}`;
       }
 
+      function flipDiscs(x, y, color) {
+        let flippedAny = false;
+        const directions = [
+          [-1, -1],
+          [-1, 0],
+          [-1, 1],
+          [0, -1],
+          [0, 1],
+          [1, -1],
+          [1, 0],
+          [1, 1],
+        ];
+
+        for (let [dx, dy] of directions) {
+          let nx = x + dx;
+          let ny = y + dy;
+          let toFlip = [];
+          while (nx >= 0 && nx < 8 && ny >= 0 && ny < 8) {
+            const cell = boardElement.children[ny * 8 + nx];
+            if (cell.children.length === 0) break;
+            const disc = cell.children[0];
+            if (disc.classList.contains(color)) {
+              if (toFlip.length > 0) {
+                toFlip.forEach(([fx, fy]) => {
+                  const flipCell =
+                    boardElement.children[fy * 8 + fx].children[0];
+                  flipCell.classList.remove(
+                    color === "black" ? "white" : "black"
+                  );
+                  flipCell.classList.add(color);
+                });
+                flippedAny = true;
+              }
+              break;
+            } else {
+              toFlip.push([nx, ny]);
+            }
+            nx += dx;
+            ny += dy;
+          }
+        }
+
+        return flippedAny;
+      }
+
       function placeDisc(index) {
+        const x = index % 8;
+        const y = Math.floor(index / 8);
         const cell = boardElement.children[index];
         if (cell.children.length === 0) {
           const disc = document.createElement("div");
           disc.classList.add("disc", currentTurn);
           cell.appendChild(disc);
-          updateCounts();
-          passCount = 0; // 駒を置くたびにパスカウントをリセット
-          checkForEndGame(); // 勝敗判定
-          switchTurn();
+
+          if (flipDiscs(x, y, currentTurn)) {
+            updateCounts();
+            passCount = 0;
+            checkForEndGame();
+            switchTurn();
+          } else {
+            cell.removeChild(disc);
+          }
         }
       }
 
