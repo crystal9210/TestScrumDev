@@ -139,22 +139,38 @@
       }
 
       function checkForEndGame() {
+        let endGameMessage = ""; // ゲーム終了時のメッセージを格納する変数
         // 駒の数が0になるか、全てのマスが埋まったかをチェック
         if (
           blackCount === 0 ||
           whiteCount === 0 ||
           blackCount + whiteCount === 64
         ) {
-          alert(`ゲーム終了! 勝者: ${blackCount > whiteCount ? "黒" : "白"}`);
-          resetBoard();
+          if (blackCount === whiteCount) {
+            // 引き分けの条件
+            endGameMessage = "ゲーム終了! 引き分けです。";
+          } else {
+            endGameMessage = `ゲーム終了! 勝者: ${
+              blackCount > whiteCount ? "黒" : "白"
+            }`;
+          }
         } else if (passCount >= 2) {
           // 両方が駒を置けなくなる（パスが2回押される）
-          alert(`ゲーム終了! 勝者: ${blackCount > whiteCount ? "黒" : "白"}`);
-          resetBoard();
+          if (blackCount === whiteCount) {
+            endGameMessage = "ゲーム終了! 引き分けです。";
+          } else {
+            endGameMessage = `ゲーム終了! 勝者: ${
+              blackCount > whiteCount ? "黒" : "白"
+            }`;
+          }
+        }
+
+        if (endGameMessage !== "") {
+          resetBoard(endGameMessage); // 盤面をリセットしてからメッセージを表示
         }
       }
 
-      function resetBoard() {
+      function resetBoard(endGameMessage) {
         while (boardElement.firstChild) {
           boardElement.removeChild(boardElement.firstChild);
         }
@@ -162,6 +178,12 @@
         whiteCount = 2;
         passCount = 0;
         createBoard(); // 盤上を初期状態に戻す
+        // アラートを表示する前に盤上および個数の表示を更新
+        updateCounts(); // 必要に応じて個数の表示を更新する関数を呼び出すか、またはここに直接表示の更新ロジックを書く
+        // 盤面の更新がDOMに反映されるのを確実に待つ
+        setTimeout(() => {
+          alert(endGameMessage); // ゲーム終了時のメッセージを表示
+        }, 0);
       }
 
       createBoard();
