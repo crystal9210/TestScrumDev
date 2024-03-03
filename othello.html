@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>オセロゲーム</title>
+    <style>
+      #board {
+        display: grid;
+        grid-template-columns: repeat(8, 50px);
+        grid-template-rows: repeat(8, 50px);
+        gap: 1px;
+      }
+
+      .cell {
+        width: 50px;
+        height: 50px;
+        background-color: green;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .cell .disc {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+      }
+
+      .black {
+        background-color: black;
+      }
+
+      .white {
+        background-color: white;
+      }
+
+      #info {
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="game">
+      <div id="board"></div>
+      <div id="info">
+        <p id="currentTurn">ターン: 黒</p>
+        <p id="blackCount">黒: 2</p>
+        <p id="whiteCount">白: 2</p>
+        <!-- パスボタンの追加 -->
+        <button id="passButton">パス</button>
+      </div>
+    </div>
+
+    <script>
+      const boardElement = document.getElementById("board");
+      const currentTurnElement = document.getElementById("currentTurn");
+      const blackCountElement = document.getElementById("blackCount");
+      const whiteCountElement = document.getElementById("whiteCount");
+
+      let currentTurn = "black";
+      let blackCount = 2;
+      let whiteCount = 2;
+
+      function createBoard() {
+        for (let i = 0; i < 64; i++) {
+          const cell = document.createElement("div");
+          cell.classList.add("cell");
+          cell.addEventListener("click", () => placeDisc(i));
+          boardElement.appendChild(cell);
+        }
+      }
+
+      <!-- コマ数の個数をアップデートする処理の関数 -->
+      function updateCounts() {
+        // 駒のカウントをリセット
+        let black = 0;
+        let white = 0;
+
+        // 盤上の全セルをスキャンして駒の数をカウント
+        for (let i = 0; i < boardElement.children.length; i++) {
+          const cell = boardElement.children[i];
+          if (cell.children.length > 0) {
+            const disc = cell.firstChild;
+            if (disc.classList.contains("black")) {
+              black++;
+            } else if (disc.classList.contains("white")) {
+              white++;
+            }
+          }
+        }
+
+        // カウントした結果をグローバル変数に設定
+        blackCount = black;
+        whiteCount = white;
+
+        // 画面の表示を更新
+        blackCountElement.textContent = `黒: ${blackCount}`;
+        whiteCountElement.textContent = `白: ${whiteCount}`;
+      }
+
+      function placeDisc(index) {
+        const cell = boardElement.children[index];
+        if (cell.children.length === 0) {
+          const disc = document.createElement("div");
+          disc.classList.add("disc", currentTurn);
+          cell.appendChild(disc);
+          updateGameStatus();
+          switchTurn();
+        }
+      }
+
+      document
+        .getElementById("passButton")
+        .addEventListener("click", function () {
+          switchTurn();
+        });
+
+      function switchTurn() {
+        currentTurn = currentTurn === "black" ? "white" : "black";
+        currentTurnElement.textContent = `ターン: ${
+          currentTurn === "black" ? "黒" : "白"
+        }`;
+      }
+
+      function updateGameStatus() {
+        // 石の数を更新するロジックをここに実装
+        // この例では具体的なゲームロジックは省略しています
+        blackCountElement.textContent = `黒: ${blackCount}`;
+        whiteCountElement.textContent = `白: ${whiteCount}`;
+      }
+
+      createBoard();
+    </script>
+  </body>
+</html>
